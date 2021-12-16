@@ -1,6 +1,18 @@
 from pprint import pprint
 
+def explore(grid, row, col, max_row, max_col, basin_coords):
+    for r, c in [[-1,0], [1,0], [0,-1], [0,1]]:
+        rr, cc = row + r, col + c
+        if 0 <= rr < max_row and 0 <= cc < max_col and not [rr, cc] in basin_coords:
+            if grid[rr][cc] < 9:
+                basin_coords.append([rr, cc])
+                basin_coords = explore(grid, rr, cc, max_row, max_col, basin_coords)
+    return basin_coords
+
 with open('input.txt') as f:
+    basins = []
+    pools = 1
+    basin_coords = []
     initial_grid = []
     for line in f:
         l = list(line.split(',')[0].strip())
@@ -11,70 +23,61 @@ with open('input.txt') as f:
         col_size = len(initial_grid[row])
         for col in range(col_size):
             spot = initial_grid[row][col]
+            if not spot == 9:
+                basin_coords = explore(initial_grid, row, col, row_size, col_size, basin_coords)
+                basin_coords.sort()
+                if not basin_coords in basins:
+                    basins.append(basin_coords)
+            basin_coords = []
             # top left
             if row == 0 and col == 0:
                 if spot < initial_grid[row + 1][col] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row + 1][col], initial_grid[row][col + 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # top row
             elif row == 0 and 0 < col < col_size - 1:
                 if spot < initial_grid[row][col - 1] and spot < initial_grid[row + 1][col] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row][col - 1], initial_grid[row + 1][col], initial_grid[row][col + 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # top right
             elif row == 0 and col == col_size - 1:
                 if spot < initial_grid[row][col - 1] and spot < initial_grid[row + 1][col]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row + 1][col], initial_grid[row][col - 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # left col
             elif 0 < row < row_size - 1 and col == 0:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row + 1][col] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row - 1][col], initial_grid[row + 1][col], initial_grid[row][col + 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # right col
             elif 0 < row < row_size - 1 and col == col_size - 1:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row][col - 1] and spot < initial_grid[row + 1][col]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row - 1][col], initial_grid[row + 1][col], initial_grid[row][col - 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # bottom left
             elif row == row_size - 1 and col == 0:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row - 1][col], initial_grid[row][col + 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # bottom row
             elif row == row_size - 1 and 0 < col < col_size - 1:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row][col - 1] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row - 1][col], initial_grid[row][col - 1], initial_grid[row][col + 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # bottom right
             elif row == row_size - 1 and col == col_size - 1:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row][col - 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row - 1][col], initial_grid[row][col - 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+
             # rest
             else:
                 if spot < initial_grid[row - 1][col] and spot < initial_grid[row][col - 1] and spot < initial_grid[row + 1][col] and spot < initial_grid[row][col + 1]:
-                    print(spot, 'at', row, col, 'is lower than neighbours:', initial_grid[row + 1][col], initial_grid[row][col + 1], initial_grid[row - 1][col], initial_grid[row][col - 1])
-                    print(risk_level, 'increasing by 1 +', spot)
                     risk_level += 1 + spot
-                    print(risk_level)
+    
+    basins.sort(reverse = True, key = len)
+    for b in basins[:3]:
+        pools *= len(b)
 
     # pprint(initial_grid)
     print(risk_level)
-    
+    print(pools)

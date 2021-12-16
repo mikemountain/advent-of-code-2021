@@ -22,7 +22,6 @@ for l in f:
 
     current_depths = new_depths.copy()
     new_depths.append(depth)
-    print(current_depths, new_depths)
     if sum(new_depths) > sum(current_depths):
         summed_measurements += 1
 
